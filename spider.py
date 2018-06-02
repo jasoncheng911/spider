@@ -6,6 +6,7 @@ class Spider():
     root_pattern = '<div class="video-info">([\s\S]*?)</div>'
     name_pattern = '</i>([\S\s]*?)</span>'
     number_pattern = '<span class="video-number">([\s\S]*?)</span>'
+    count = 0
 
     def __fetch_content(self):
         r = request.urlopen(Spider.url)
@@ -16,17 +17,13 @@ class Spider():
     def __analysis(self, htmls):
         root_html = re.findall(Spider.root_pattern,htmls)
         anchors = []
-        count = 0
+        self.count = 0
         for html in root_html:
             name = re.findall(Spider.name_pattern,html)
-            names = re.findall('[^\\s]*',name[0])
             number = re.findall(Spider.number_pattern,html)
-            anchor = {'name':names[73], 'number':number}
+            anchor = {'name':name, 'number':number}
             anchors.append(anchor)
-            print(anchors[count])
-            count+=1
-            print("\n")
-            # break
+            self.count+=1
 
         return anchors
 
@@ -40,9 +37,9 @@ class Spider():
     def go(self):
         htmls = self.__fetch_content()
         anchors = self.__analysis(htmls)
-        self.__refine(anchors)
-
-
+        anchors = list(self.__refine(anchors))
+        print(anchors)
+        print("总数: ", self.count)
 
 spider = Spider()
 spider.go()
