@@ -4,7 +4,7 @@ import re
 class Spider():
     url = 'https://www.panda.tv/cate/lol?pdt=1.24.s1.3.6gbvhfcbkbn'
     root_pattern = '<div class="video-info">([\s\S]*?)</div>'
-    name_pattern = '</i>([\S\s]*?)</span>'
+    name_pattern = '</i>([\s\S]*?)</span>'
     number_pattern = '<span class="video-number">([\s\S]*?)</span>'
     count = 0
 
@@ -34,11 +34,28 @@ class Spider():
         }
         return map(l,anchors)
 
+    def __sort(self, anchors):
+        anchors = sorted(anchors, key=self.__sort_seed, reverse=True)
+        return anchors
+
+    def __sort_seed(self, anchor):
+        r = re.findall('\d*', anchor['number'])
+        number = float(r[0])
+        if "万" in anchor['number']:
+            number *= 10000
+        return number
+
+    def __show(self, anchors):
+        for rank in range(0, len(anchors)):
+            print('rank ' + str(rank + 1) + ' : ' + anchors[rank]['name'] + '---' + anchors[rank]['number'])
+
     def go(self):
         htmls = self.__fetch_content()
         anchors = self.__analysis(htmls)
         anchors = list(self.__refine(anchors))
-        print(anchors)
+        anchors = self.__sort(anchors)
+        self.__show(anchors)
+        # print(anchors)
         print("总数: ", self.count)
 
 spider = Spider()
